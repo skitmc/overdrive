@@ -3,294 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKITMC | ULTIMATE CLICKER</title>
+    <title>SKITMC | INFINITY CLICKER</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #22d3ee;
-            --accent-glow: rgba(34, 211, 238, 0.3);
+            --bg: #0a0f1e;
+            --panel: #161b2d;
+            --accent: #f59e0b; 
+            --click-neon: #06b6d4;
             --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --success: #4ade80;
-            --danger: #ef4444;
+            --success: #22c55e;
+            --border: #2d3748;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
+        /* Professional Header */
         header {
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card);
+            background: var(--panel);
+            padding: 15px 30px;
             border-bottom: 2px solid var(--accent);
-            box-shadow: 0 4px 20px var(--accent-glow);
-            z-index: 10;
-        }
-
-        header h1 {
-            letter-spacing: 4px;
-            font-size: 1.5rem;
-            text-transform: uppercase;
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        main { display: flex; flex: 1; overflow: hidden; }
-
-        .clicker-section {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid #334155;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-        }
-
-        .score-container { text-align: center; margin-bottom: 3rem; }
-        .score-container h2 { font-size: 4.5rem; margin: 0; }
-        .score-container p { color: var(--accent); font-weight: bold; letter-spacing: 1px; }
-
-        #big-button {
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            border: 8px solid var(--accent);
-            background: var(--card);
-            cursor: pointer;
-            transition: transform 0.05s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 40px var(--accent-glow);
-        }
-
-        #big-button:active { transform: scale(0.92); }
-        #big-button span { font-size: 6rem; filter: drop-shadow(0 0 10px var(--accent)); }
-
-        .shop-section {
-            flex: 1;
-            background: var(--card);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .shop-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 0.5rem;
+            z-index: 100;
         }
 
-        #shop-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .level-box { flex: 1; max-width: 600px; margin: 0 40px; }
+        .progress-container { height: 12px; background: #020617; border-radius: 10px; margin-top: 5px; border: 1px solid var(--border); overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 0.3s; }
 
-        .upgrade-card {
-            background: #0f172a;
-            border: 1px solid #334155;
+        main { display: flex; flex: 1; overflow: hidden; }
+
+        /* Left Side: Interaction */
+        .click-zone {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #0a0f1e 100%);
+            border-right: 1px solid var(--border);
+        }
+
+        #score-display { font-size: 5rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+        #pps-display { font-size: 1.2rem; color: var(--click-neon); margin-bottom: 30px; font-weight: 600; }
+
+        #main-btn {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 10px solid var(--click-neon);
+            background: var(--panel);
+            cursor: pointer;
+            font-size: 7rem;
+            transition: transform 0.05s, box-shadow 0.2s;
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.2);
+            user-select: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #main-btn:active { transform: scale(0.92); box-shadow: 0 0 60px rgba(6, 182, 212, 0.4); }
+
+        /* Right Side: Mega Shop */
+        .shop-zone { flex: 1; background: var(--panel); display: flex; flex-direction: column; }
+        .shop-tabs { padding: 20px; border-bottom: 1px solid var(--border); font-weight: bold; letter-spacing: 1px; color: var(--accent); }
+        
+        #upgrade-list { flex: 1; overflow-y: scroll; padding: 15px; }
+        #upgrade-list::-webkit-scrollbar { width: 8px; }
+        #upgrade-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .item {
+            background: #1e293b;
+            padding: 15px;
             border-radius: 12px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: 0.2s;
+            border: 1px solid transparent;
         }
+        .item:hover:not(.locked) { background: #2d3748; border-color: var(--click-neon); transform: translateX(-3px); }
+        .item.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+        .item.special { border: 2px solid var(--accent); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
 
-        .upgrade-card:hover:not(.disabled) { border-color: var(--accent); background: #16213e; }
-        .upgrade-card.disabled { opacity: 0.3; cursor: not-allowed; }
+        .item-text h4 { font-size: 1rem; color: #fff; }
+        .item-text p { font-size: 0.75rem; color: #94a3b8; }
+        .item-cost { font-weight: 800; color: var(--success); font-size: 1.1rem; }
 
-        .upgrade-info h4 { color: var(--text); margin-bottom: 4px; font-size: 1rem; }
-        .upgrade-info p { font-size: 0.75rem; color: var(--text-dim); }
+        /* Footer */
+        footer { background: #020617; padding: 10px 25px; display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; }
 
-        .upgrade-cost { text-align: right; font-weight: bold; color: var(--success); font-size: 1.1rem; }
-
-        .reset-btn {
-            margin-top: 10px;
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 8px;
-            border-radius: 6px;
+        .rebirth-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 0.7rem;
-            opacity: 0.6;
-        }
-        .reset-btn:hover { opacity: 1; background: var(--danger); color: white; }
-
-        .footer-stats {
-            padding: 12px 25px;
-            background: #020617;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            border-top: 1px solid #1e293b;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>SKITMC TERMINAL v2.0</h1>
-    </header>
-
-    <main>
-        <section class="clicker-section">
-            <div class="score-container">
-                <h2 id="score">0</h2>
-                <p id="pps-display">0 / SEC</p>
-            </div>
-            
-            <button id="big-button">
-                <span>💎</span>
-            </button>
-        </section>
-
-        <section class="shop-section">
-            <div class="shop-header">
-                <h2>MARKET</h2>
-                <span id="save-status" style="font-size: 0.7rem; color: var(--success);">Autosaved</span>
-            </div>
-            
-            <div id="shop-container"></div>
-            
-            <button class="reset-btn" onclick="resetGame()">WIPE ALL DATA</button>
-        </section>
-    </main>
-
-    <div class="footer-stats">
-        <div>Total Clicks: <span id="stat-clicks">0</span></div>
-        <div>Click Power: <span id="stat-ppc">1</span></div>
-        <div>Session Saved to Browser</div>
+<header>
+    <div><strong>SKITMC</strong> <small id="version">v4.0</small></div>
+    <div class="level-box">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+            <span id="lvl-txt">LEVEL 1</span>
+            <span id="xp-txt">0 / 100 XP</span>
+        </div>
+        <div class="progress-container"><div id="progress-fill"></div></div>
     </div>
+    <button class="rebirth-btn" id="rebirth-btn" onclick="prestige()">REBIRTH</button>
+</header>
 
-    <script>
-        // Game State
-        let score = 0;
-        let totalClicks = 0;
-        let pointsPerClick = 1;
-        let pointsPerSecond = 0;
+<main>
+    <section class="click-zone">
+        <div id="score-display">0</div>
+        <div id="pps-display">0.0 PER SECOND</div>
+        <button id="main-btn">🔘</button>
+    </section>
 
-        const baseUpgrades = [
-            { id: 0, name: "Neural Link", desc: "+1 Per Click", cost: 15, increase: 1, type: 'click' },
-            { id: 1, name: "Basic Drone", desc: "+1 Per Second", cost: 50, increase: 1, type: 'auto' },
-            { id: 2, name: "Advanced Script", desc: "+8 Per Second", cost: 400, increase: 8, type: 'auto' },
-            { id: 3, name: "Quantum Mouse", desc: "+30 Per Click", cost: 1500, increase: 30, type: 'click' },
-            { id: 4, name: "SkitMC Mainframe", desc: "+150 Per Second", cost: 8000, increase: 150, type: 'auto' }
-        ];
+    <section class="shop-zone">
+        <div class="shop-tabs">PURCHASABLE UPGRADES</div>
+        <div id="upgrade-list"></div>
+    </section>
+</main>
 
-        let owned = new Array(baseUpgrades.length).fill(0);
+<footer>
+    <span>PPC: <span id="stat-ppc">1</span></span>
+    <span>TOTAL CAREER: <span id="stat-total">0</span></span>
+    <span>MULTIPLIER: <span id="stat-mult">1x</span></span>
+</footer>
 
-        // Load Game Data
-        function loadGame() {
-            const savedData = localStorage.getItem('skitmc_clicker_save');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                score = data.score || 0;
-                totalClicks = data.totalClicks || 0;
-                owned = data.owned || new Array(baseUpgrades.length).fill(0);
-                recalculateStats();
-            }
-        }
+<script>
+    let score = 0;
+    let totalEarned = 0;
+    let prestigeLevel = 0;
+    let level = 1;
 
-        // Save Game Data
-        function saveGame() {
-            const data = { score, totalClicks, owned };
-            localStorage.setItem('skitmc_clicker_save', JSON.stringify(data));
-            const status = document.getElementById('save-status');
-            status.innerText = "Saved!";
-            setTimeout(() => status.innerText = "Autosaved", 2000);
-        }
+    // A LOT of purchasable things
+    const catalog = [
+        { name: "Super Finger", type: 'click', cost: 15, power: 1, rate: 3.0, desc: "Hand-crafted clicking power.", special: true },
+        { name: "Auto-Clicker", type: 'auto', cost: 50, power: 1, rate: 1.15, desc: "A basic mouse macro." },
+        { name: "Double Mouse", type: 'click', cost: 500, power: 15, rate: 3.5, desc: "Two mice, one hand.", special: true },
+        { name: "Skit Bot", type: 'auto', cost: 600, power: 8, rate: 1.15, desc: "An automated clicking script." },
+        { name: "Server Blade", type: 'auto', cost: 3000, power: 40, rate: 1.15, desc: "Rack-mounted processing." },
+        { name: "Click Farm", type: 'auto', cost: 15000, power: 150, rate: 1.16, desc: "A room full of clicking devices." },
+        { name: "Neural Link", type: 'auto', cost: 100000, power: 850, rate: 1.17, desc: "Think and it clicks." },
+        { name: "Data Center", type: 'auto', cost: 500000, power: 3000, rate: 1.18, desc: "Industrial grade output." },
+        { name: "Satellite Relay", type: 'auto', cost: 2500000, power: 12000, rate: 1.19, desc: "Orbital clicking technology." },
+        { name: "Reality Warper", type: 'auto', cost: 15000000, power: 55000, rate: 1.20, desc: "Clicks don't exist, only points." }
+    ];
 
-        function resetGame() {
-            if (confirm("Are you sure? This deletes everything!")) {
-                localStorage.removeItem('skitmc_clicker_save');
-                location.reload();
-            }
-        }
+    let owned = new Array(catalog.length).fill(0);
 
-        function recalculateStats() {
-            pointsPerClick = 1;
-            pointsPerSecond = 0;
-            baseUpgrades.forEach((u, i) => {
-                if (u.type === 'click') pointsPerClick += (u.increase * owned[i]);
-                else pointsPerSecond += (u.increase * owned[i]);
-            });
-        }
-
-        function renderShop() {
-            const container = document.getElementById('shop-container');
-            container.innerHTML = '';
-            baseUpgrades.forEach((u, i) => {
-                const currentCost = Math.floor(u.cost * Math.pow(1.15, owned[i]));
-                const card = document.createElement('div');
-                card.className = `upgrade-card ${score < currentCost ? 'disabled' : ''}`;
-                card.onclick = () => buyUpgrade(i);
-                card.innerHTML = `
-                    <div class="upgrade-info">
-                        <h4>${u.name} [Lv.${owned[i]}]</h4>
-                        <p>${u.desc}</p>
-                    </div>
-                    <div class="upgrade-cost">${currentCost.toLocaleString()}</div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function buyUpgrade(i) {
-            const currentCost = Math.floor(baseUpgrades[i].cost * Math.pow(1.15, owned[i]));
-            if (score >= currentCost) {
-                score -= currentCost;
-                owned[i]++;
-                recalculateStats();
-                updateDisplay();
-                renderShop();
-            }
-        }
-
-        function updateDisplay() {
-            document.getElementById('score').innerText = Math.floor(score).toLocaleString();
-            document.getElementById('pps-display').innerText = `${pointsPerSecond.toLocaleString()} / SEC`;
-            document.getElementById('stat-clicks').innerText = totalClicks.toLocaleString();
-            document.getElementById('stat-ppc').innerText = pointsPerClick.toLocaleString();
-        }
-
-        // Click Event
-        document.getElementById('big-button').addEventListener('click', () => {
-            score += pointsPerClick;
-            totalClicks++;
-            updateDisplay();
-            renderShop();
-        });
-
-        // Game Loops
-        setInterval(() => {
-            score += (pointsPerSecond / 10); // Run at 10fps for smoothness
-            updateDisplay();
-            renderShop();
-        }, 100);
-
-        setInterval(saveGame, 5000); // Save every 5 seconds
-
-        // Start
-        loadGame();
+    function init() {
+        load();
+        setInterval(gameTick, 100);
+        setInterval(save, 5000);
+        updateUI();
         renderShop();
-        updateDisplay();
-    </script>
+    }
+
+    function gameTick() {
+        let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
+        let pps = 0;
+        catalog.forEach((u, i) => { if(u.type === 'auto') pps += (u.power * owned[i]); });
+        
+        let gain = (pps * mult) / 10;
+        score += gain;
+        totalEarned += gain;
+        
+        checkLevel();
+        updateUI(mult, pps);
+    }
+
+    document.getElementById('main-btn').addEventListener('click', () => {
+        let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
+        let ppc = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
+        
+        let clickGain = ppc * mult;
+        score += clickGain;
+        totalEarned += clickGain;
+        updateUI(mult);
+        renderShop();
+    });
+
+    function buy(i) {
+        let u = catalog[i];
+        let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
+        if (score >= cost) {
+            score -= cost;
+            owned[i]++;
+            renderShop();
+            updateUI();
+        }
+    }
+
+    function checkLevel() {
+        let next = 100 * Math.pow(level, 2.5);
+        if (totalEarned >= next) level++;
+        document.getElementById('rebirth-btn').style.display = (level >= 15) ? 'block' : 'none';
+    }
+
+    function updateUI(mult = 1, pps = 0) {
+        document.getElementById('score-display').innerText = Math.floor(score).toLocaleString();
+        document.getElementById('pps-display').innerText = (pps * mult).toFixed(1) + " PER SECOND";
+        
+        // Stats
+        let ppc = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
+        document.getElementById('stat-ppc').innerText = (ppc * mult).toFixed(1);
+        document.getElementById('stat-total').innerText = Math.floor(totalEarned).toLocaleString();
+        document.getElementById('stat-mult').innerText = mult.toFixed(1) + "x";
+
+        // Level Bar
+        let currentLvlBase = 100 * Math.pow(level - 1, 2.5);
+        let nextLvlReq = 100 * Math.pow(level, 2.5);
+        let progress = ((totalEarned - currentLvlBase) / (nextLvlReq - currentLvlBase)) * 100;
+        document.getElementById('lvl-txt').innerText = "LEVEL " + level;
+        document.getElementById('xp-txt').innerText = Math.floor(totalEarned).toLocaleString() + " / " + Math.floor(nextLvlReq).toLocaleString() + " XP";
+        document.getElementById('progress-fill').style.width = progress + "%";
+    }
+
+    function renderShop() {
+        const container = document.getElementById('upgrade-list');
+        container.innerHTML = '';
+        catalog.forEach((u, i) => {
+            let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
+            let canAfford = score >= cost;
+            let item = document.createElement('div');
+            item.className = `item ${!canAfford ? 'locked' : ''} ${u.special ? 'special' : ''}`;
+            item.onclick = () => buy(i);
+            item.innerHTML = `
+                <div class="item-text">
+                    <h4>${u.name} [Lv.${owned[i]}]</h4>
+                    <p>${u.desc}</p>
+                </div>
+                <div class="item-cost">${cost.toLocaleString()}</div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function prestige() {
+        if (confirm("Rebirth? Score and upgrades reset, but you gain a permanent x2 speed!")) {
+            prestigeLevel++;
+            score = 0;
+            owned = new Array(catalog.length).fill(0);
+            save();
+            location.reload();
+        }
+    }
+
+    function save() {
+        localStorage.setItem('skitmc_v4', JSON.stringify({score, totalEarned, owned, level, prestigeLevel}));
+    }
+
+    function load() {
+        let raw = localStorage.getItem('skitmc_v4');
+        if (raw) {
+            let d = JSON.parse(raw);
+            score = d.score || 0;
+            totalEarned = d.totalEarned || 0;
+            owned = d.owned || owned;
+            level = d.level || 1;
+            prestigeLevel = d.prestigeLevel || 0;
+        }
+    }
+
+    init();
+</script>
 </body>
 </html>
