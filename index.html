@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKITMC | Clicker LHS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .game-container {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            width: 350px;
+        }
+
+        h1 { margin-bottom: 0.5rem; color: #00ff88; }
+        .score-display { font-size: 2.5rem; font-weight: bold; margin-bottom: 2rem; }
+
+        #main-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #00ff88, #00bd65);
+            color: #121212;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px #007a41;
+            transition: 0.1s;
+            margin-bottom: 2rem;
+        }
+
+        #main-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px #007a41;
+        }
+
+        .shop {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upgrade-btn {
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .upgrade-btn:hover:not(:disabled) {
+            background: #3a3a3a;
+            border-color: #00ff88;
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>SKITMC CLICKER</h1>
+        <div class="score-display" id="score">0</div>
+        
+        <button id="main-button">CLICK ME</button>
+
+        <div class="shop">
+            <button class="upgrade-btn" id="upgrade1" onclick="buyUpgrade(10, 1)">
+                <span>Better Click (+1)</span>
+                <span id="cost1">Cost: 10</span>
+            </button>
+            <button class="upgrade-btn" id="upgrade2" onclick="buyUpgrade(50, 5)">
+                <span>Super Click (+5)</span>
+                <span id="cost2">Cost: 50</span>
+            </button>
+        </div>
+
+        <div class="stats">
+            Points per click: <span id="per-click">1</span>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let pointsPerClick = 1;
+
+        const scoreEl = document.getElementById('score');
+        const mainBtn = document.getElementById('main-button');
+        const perClickEl = document.getElementById('per-click');
+
+        // Main Click logic
+        mainBtn.addEventListener('click', () => {
+            score += pointsPerClick;
+            updateDisplay();
+        });
+
+        function buyUpgrade(baseCost, boost) {
+            if (score >= baseCost) {
+                score -= baseCost;
+                pointsPerClick += boost;
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            scoreEl.innerText = Math.floor(score);
+            perClickEl.innerText = pointsPerClick;
+            
+            // Disable buttons if you can't afford them
+            document.getElementById('upgrade1').disabled = (score < 10);
+            document.getElementById('upgrade2').disabled = (score < 50);
+        }
+
+        // Run once to set initial state
+        updateDisplay();
+    </script>
+</body>
+</html>
