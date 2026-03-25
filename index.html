@@ -18,7 +18,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Professional Header */
         header {
             background: var(--panel);
             padding: 15px 30px;
@@ -35,7 +34,6 @@
 
         main { display: flex; flex: 1; overflow: hidden; }
 
-        /* Left Side: Interaction */
         .click-zone {
             flex: 1.2;
             display: flex;
@@ -44,10 +42,11 @@
             justify-content: center;
             background: radial-gradient(circle at center, #1e293b 0%, #0a0f1e 100%);
             border-right: 1px solid var(--border);
+            position: relative;
         }
 
         #score-display { font-size: 5rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
-        #pps-display { font-size: 1.2rem; color: var(--click-neon); margin-bottom: 30px; font-weight: 600; }
+        #pps-display { font-size: 1.2rem; color: var(--click-neon); margin-bottom: 30px; font-weight: 600; min-height: 1.5em; }
 
         #main-btn {
             width: 280px;
@@ -57,14 +56,28 @@
             background: var(--panel);
             cursor: pointer;
             font-size: 7rem;
-            transition: transform 0.05s, box-shadow 0.2s;
+            transition: transform 0.05s;
             box-shadow: 0 0 40px rgba(6, 182, 212, 0.2);
             user-select: none;
             display: flex; align-items: center; justify-content: center;
+            position: relative;
         }
-        #main-btn:active { transform: scale(0.92); box-shadow: 0 0 60px rgba(6, 182, 212, 0.4); }
+        #main-btn:active { transform: scale(0.92); }
 
-        /* Right Side: Mega Shop */
+        .floating-text {
+            position: absolute;
+            color: var(--click-neon);
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+
         .shop-zone { flex: 1; background: var(--panel); display: flex; flex-direction: column; }
         .shop-tabs { padding: 20px; border-bottom: 1px solid var(--border); font-weight: bold; letter-spacing: 1px; color: var(--accent); }
         
@@ -86,31 +99,20 @@
         }
         .item:hover:not(.locked) { background: #2d3748; border-color: var(--click-neon); transform: translateX(-3px); }
         .item.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-        .item.special { border: 2px solid var(--accent); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+        .item.special { border: 2px solid var(--accent); }
 
         .item-text h4 { font-size: 1rem; color: #fff; }
         .item-text p { font-size: 0.75rem; color: #94a3b8; }
         .item-cost { font-weight: 800; color: var(--success); font-size: 1.1rem; }
 
-        /* Footer */
         footer { background: #020617; padding: 10px 25px; display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; }
-
-        .rebirth-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-        }
+        .rebirth-btn { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div><strong>SKITMC</strong> <small id="version">v4.0</small></div>
+    <div><strong>SKITMC</strong> <small>v4.1</small></div>
     <div class="level-box">
         <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
             <span id="lvl-txt">LEVEL 1</span>
@@ -122,22 +124,22 @@
 </header>
 
 <main>
-    <section class="click-zone">
+    <section class="click-zone" id="click-zone">
         <div id="score-display">0</div>
-        <div id="pps-display">0.0 PER SECOND</div>
-        <button id="main-btn">🔘</button>
+        <div id="pps-display">0.0 TOTAL INCOME / SEC</div>
+        <button id="main-btn">💎</button>
     </section>
 
     <section class="shop-zone">
-        <div class="shop-tabs">PURCHASABLE UPGRADES</div>
+        <div class="shop-tabs">ULTIMATE SHOP</div>
         <div id="upgrade-list"></div>
     </section>
 </main>
 
 <footer>
-    <span>PPC: <span id="stat-ppc">1</span></span>
-    <span>TOTAL CAREER: <span id="stat-total">0</span></span>
+    <span>PER CLICK: <span id="stat-ppc">1</span></span>
     <span>MULTIPLIER: <span id="stat-mult">1x</span></span>
+    <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#444; cursor:pointer;">Reset</button>
 </footer>
 
 <script>
@@ -146,54 +148,63 @@
     let prestigeLevel = 0;
     let level = 1;
 
-    // A LOT of purchasable things
     const catalog = [
-        { name: "Super Finger", type: 'click', cost: 15, power: 1, rate: 3.0, desc: "Hand-crafted clicking power.", special: true },
-        { name: "Auto-Clicker", type: 'auto', cost: 50, power: 1, rate: 1.15, desc: "A basic mouse macro." },
-        { name: "Double Mouse", type: 'click', cost: 500, power: 15, rate: 3.5, desc: "Two mice, one hand.", special: true },
-        { name: "Skit Bot", type: 'auto', cost: 600, power: 8, rate: 1.15, desc: "An automated clicking script." },
-        { name: "Server Blade", type: 'auto', cost: 3000, power: 40, rate: 1.15, desc: "Rack-mounted processing." },
-        { name: "Click Farm", type: 'auto', cost: 15000, power: 150, rate: 1.16, desc: "A room full of clicking devices." },
-        { name: "Neural Link", type: 'auto', cost: 100000, power: 850, rate: 1.17, desc: "Think and it clicks." },
-        { name: "Data Center", type: 'auto', cost: 500000, power: 3000, rate: 1.18, desc: "Industrial grade output." },
-        { name: "Satellite Relay", type: 'auto', cost: 2500000, power: 12000, rate: 1.19, desc: "Orbital clicking technology." },
-        { name: "Reality Warper", type: 'auto', cost: 15000000, power: 55000, rate: 1.20, desc: "Clicks don't exist, only points." }
+        { name: "Personal Hand", type: 'click', cost: 15, power: 1, rate: 3.0, desc: "Hand-crafted clicking power.", special: true },
+        { name: "Task Script", type: 'auto', cost: 50, power: 1, rate: 1.15, desc: "A basic background process." },
+        { name: "Gaming Mouse", type: 'click', cost: 600, power: 12, rate: 3.5, desc: "Razer-fast response times.", special: true },
+        { name: "Skit Server", type: 'auto', cost: 1200, power: 10, rate: 1.15, desc: "Dedicated hosting power." },
+        { name: "Data Farm", type: 'auto', cost: 5000, power: 55, rate: 1.16, desc: "A room full of machines." },
+        { name: "Neural Bot", type: 'auto', cost: 25000, power: 240, rate: 1.17, desc: "AI that learns to click." },
+        { name: "Satellite Link", type: 'auto', cost: 150000, power: 1100, rate: 1.18, desc: "Orbital point generation." },
+        { name: "Quantum Rig", type: 'auto', cost: 1000000, power: 6000, rate: 1.19, desc: "Computing across dimensions." },
+        { name: "Reality Core", type: 'auto', cost: 10000000, power: 45000, rate: 1.20, desc: "Bending physics for points." }
     ];
 
     let owned = new Array(catalog.length).fill(0);
 
     function init() {
         load();
-        setInterval(gameTick, 100);
+        setInterval(gameTick, 100); 
         setInterval(save, 5000);
-        updateUI();
         renderShop();
     }
 
     function gameTick() {
         let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
-        let pps = 0;
-        catalog.forEach((u, i) => { if(u.type === 'auto') pps += (u.power * owned[i]); });
+        let ppsBase = 0;
+        catalog.forEach((u, i) => { if(u.type === 'auto') ppsBase += (u.power * owned[i]); });
         
-        let gain = (pps * mult) / 10;
+        let gain = (ppsBase * mult) / 10;
         score += gain;
         totalEarned += gain;
         
         checkLevel();
-        updateUI(mult, pps);
+        updateUI(mult, ppsBase);
     }
 
-    document.getElementById('main-btn').addEventListener('click', () => {
+    document.getElementById('main-btn').addEventListener('click', (e) => {
         let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
-        let ppc = 1;
-        catalog.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
+        let ppcBase = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
         
-        let clickGain = ppc * mult;
-        score += clickGain;
-        totalEarned += clickGain;
+        let clickVal = ppcBase * mult;
+        score += clickVal;
+        totalEarned += clickVal;
+        
+        spawnFloatingText(e.clientX, e.clientY, clickVal);
         updateUI(mult);
         renderShop();
     });
+
+    function spawnFloatingText(x, y, val) {
+        const text = document.createElement('div');
+        text.className = 'floating-text';
+        text.innerText = '+' + Math.floor(val).toLocaleString();
+        text.style.left = x + 'px';
+        text.style.top = y + 'px';
+        document.body.appendChild(text);
+        setTimeout(() => text.remove(), 800);
+    }
 
     function buy(i) {
         let u = catalog[i];
@@ -207,25 +218,22 @@
     }
 
     function checkLevel() {
-        let next = 100 * Math.pow(level, 2.5);
+        let next = 100 * Math.pow(level, 2.3);
         if (totalEarned >= next) level++;
-        document.getElementById('rebirth-btn').style.display = (level >= 15) ? 'block' : 'none';
+        document.getElementById('rebirth-btn').style.display = (level >= 12) ? 'block' : 'none';
     }
 
     function updateUI(mult = 1, pps = 0) {
         document.getElementById('score-display').innerText = Math.floor(score).toLocaleString();
-        document.getElementById('pps-display').innerText = (pps * mult).toFixed(1) + " PER SECOND";
+        document.getElementById('pps-display').innerText = (pps * mult).toLocaleString() + " TOTAL INCOME / SEC";
         
-        // Stats
-        let ppc = 1;
-        catalog.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
-        document.getElementById('stat-ppc').innerText = (ppc * mult).toFixed(1);
-        document.getElementById('stat-total').innerText = Math.floor(totalEarned).toLocaleString();
+        let ppcBase = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
+        document.getElementById('stat-ppc').innerText = (ppcBase * mult).toLocaleString();
         document.getElementById('stat-mult').innerText = mult.toFixed(1) + "x";
 
-        // Level Bar
-        let currentLvlBase = 100 * Math.pow(level - 1, 2.5);
-        let nextLvlReq = 100 * Math.pow(level, 2.5);
+        let currentLvlBase = 100 * Math.pow(level - 1, 2.3);
+        let nextLvlReq = 100 * Math.pow(level, 2.3);
         let progress = ((totalEarned - currentLvlBase) / (nextLvlReq - currentLvlBase)) * 100;
         document.getElementById('lvl-txt').innerText = "LEVEL " + level;
         document.getElementById('xp-txt').innerText = Math.floor(totalEarned).toLocaleString() + " / " + Math.floor(nextLvlReq).toLocaleString() + " XP";
@@ -253,7 +261,7 @@
     }
 
     function prestige() {
-        if (confirm("Rebirth? Score and upgrades reset, but you gain a permanent x2 speed!")) {
+        if (confirm("REBIRTH? Everything resets but you get x2 Multiplier!")) {
             prestigeLevel++;
             score = 0;
             owned = new Array(catalog.length).fill(0);
@@ -263,11 +271,11 @@
     }
 
     function save() {
-        localStorage.setItem('skitmc_v4', JSON.stringify({score, totalEarned, owned, level, prestigeLevel}));
+        localStorage.setItem('skitmc_final', JSON.stringify({score, totalEarned, owned, level, prestigeLevel}));
     }
 
     function load() {
-        let raw = localStorage.getItem('skitmc_v4');
+        let raw = localStorage.getItem('skitmc_final');
         if (raw) {
             let d = JSON.parse(raw);
             score = d.score || 0;
