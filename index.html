@@ -12,6 +12,7 @@
             --panel: rgba(10, 10, 15, 0.98);
             --yellow: #ffcc00;
             --orange: #ff6600;
+            --green: #00ff66;
             --border: #1a1a1a;
         }
 
@@ -61,8 +62,21 @@
         #settings-menu {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: var(--panel); border: 2px solid var(--orange); padding: 25px;
-            z-index: 300; display: none; width: 320px;
+            z-index: 300; display: none; width: 320px; box-shadow: 0 0 50px #000;
         }
+
+        /* Dev Menu Styles */
+        #dev-menu {
+            position: fixed; top: 20px; left: 20px; background: rgba(0, 20, 0, 0.9);
+            border: 2px solid var(--green); padding: 15px; z-index: 400; display: none;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); border-radius: 5px;
+        }
+        .dev-btn {
+            display: block; width: 100%; margin-bottom: 8px; padding: 8px;
+            background: #003311; color: var(--green); border: 1px solid var(--green);
+            font-family: 'JetBrains Mono'; cursor: pointer; font-weight: 900;
+        }
+        .dev-btn:hover { background: var(--green); color: #000; }
 
         main { display: flex; flex: 1; overflow: hidden; z-index: 5; }
 
@@ -100,18 +114,18 @@
 
         .shop-section { flex: 1; background: #08080a; display: flex; flex-direction: column; }
         
-        /* New Shop Header UI */
         .shop-header {
             padding: 15px 20px; background: #000; border-bottom: 1px solid var(--orange);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
         }
-        .shop-title { color: var(--orange); font-weight: 900; font-size: 0.85rem; letter-spacing: 2px; }
+        .shop-title { color: var(--orange); font-weight: 900; font-size: 0.85rem; letter-spacing: 2px; width: 100%; text-align: center; }
         .buy-toggles { display: flex; gap: 5px; }
         .buy-btn {
             background: #111; color: #666; border: 1px solid #333; padding: 4px 10px;
             font-family: 'JetBrains Mono'; font-weight: 900; cursor: pointer; transition: 0.2s;
         }
-        .buy-btn.active { background: var(--orange); color: #000; border-color: var(--yellow); }
+        .buy-btn.active.mode-buy { background: var(--orange); color: #000; border-color: var(--yellow); }
+        .buy-btn.active.mode-sell { background: var(--green); color: #000; border-color: #fff; }
         .buy-btn:hover:not(.active) { background: #222; color: #fff; }
 
         #upgrade-list { flex: 1; overflow-y: auto; padding: 15px; }
@@ -122,7 +136,9 @@
             align-items: center; cursor: pointer; transition: 0.2s;
         }
         .item:hover:not(.locked) { border-color: var(--yellow); background: #14141c; transform: translateX(-2px); }
+        .item.sell-mode:hover:not(.locked) { border-color: var(--green); background: #0a140f; }
         .item.locked { opacity: 0.15; cursor: not-allowed; }
+        
         .item-info h4 { font-size: 0.85rem; color: var(--yellow); }
         .item-info p { font-size: 0.65rem; color: #555; }
         .item-cost-display { text-align: right; }
@@ -151,8 +167,17 @@
 
 <canvas id="lightning"></canvas>
 
+<div id="dev-menu">
+    <h3 style="color:var(--green); margin-bottom:15px; text-align:center; font-size:0.9rem; letter-spacing:2px;">DEV OVERRIDE</h3>
+    <button class="dev-btn" onclick="cheatMult()">x1000 WATTS</button>
+    <button class="dev-btn" onclick="cheatBuyAll()">BUY 10 ALL</button>
+    <button class="dev-btn" onclick="cheatSellAll()">SELL 10 ALL</button>
+    <button class="dev-btn" style="background:transparent; color:#888; border-color:#555; margin-top:10px;" onclick="document.getElementById('dev-menu').style.display='none'">HIDE PANEL</button>
+</div>
+
 <div id="settings-menu">
     <h3 style="color:var(--orange); margin-bottom: 20px; text-align: center;">SYSTEM</h3>
+    <button onclick="enterCode()" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:8px; cursor:pointer; font-weight:900; margin-bottom: 15px; font-family:'JetBrains Mono';">ENTER OVERRIDE CODE</button>
     <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Visual FX</span><input type="checkbox" id="anim-toggle" checked></div>
     <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Background Music</span><input type="checkbox" id="music-toggle" onchange="updateMusic()"></div>
     <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Purchase SFX</span><input type="checkbox" id="sfx-toggle" checked></div>
@@ -189,9 +214,13 @@
         <div class="shop-header">
             <div class="shop-title">SUBSYSTEMS</div>
             <div class="buy-toggles">
-                <button class="buy-btn active" id="btn-1x" onclick="setBuyAmount(1)">1x</button>
-                <button class="buy-btn" id="btn-5x" onclick="setBuyAmount(5)">5x</button>
-                <button class="buy-btn" id="btn-10x" onclick="setBuyAmount(10)">10x</button>
+                <button class="buy-btn active mode-buy" id="mode-buy" onclick="setShopMode('buy')">BUY</button>
+                <button class="buy-btn mode-sell" id="mode-sell" onclick="setShopMode('sell')">SELL</button>
+            </div>
+            <div class="buy-toggles">
+                <button class="buy-btn active mode-buy" id="btn-1x" onclick="setBuyAmount(1)">1x</button>
+                <button class="buy-btn mode-buy" id="btn-5x" onclick="setBuyAmount(5)">5x</button>
+                <button class="buy-btn mode-buy" id="btn-10x" onclick="setBuyAmount(10)">10x</button>
             </div>
         </div>
         <div id="upgrade-list"></div>
@@ -208,7 +237,8 @@
 
 <script>
     let watts = 0, totalEver = 0, level = 1, rebirths = 0;
-    let buyAmount = 1; // Tracks how many items we are buying at once
+    let buyAmount = 1; 
+    let shopMode = 'buy'; // 'buy' or 'sell'
     
     const canvas = document.getElementById('lightning');
     const ctx = canvas.getContext('2d');
@@ -249,19 +279,75 @@
         else bgMusic.pause();
     }
 
-    // Handles switching between 1x, 5x, and 10x
-    function setBuyAmount(amt) {
-        buyAmount = amt;
-        document.querySelectorAll('.buy-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('btn-' + amt + 'x').classList.add('active');
+    function enterCode() {
+        let code = prompt("ENTER SYSTEM OVERRIDE CODE:");
+        if (code === "skitisking") {
+            document.getElementById('dev-menu').style.display = 'block';
+            toggleSettings(); // Close settings menu automatically
+        } else if (code) {
+            alert("ACCESS DENIED: INVALID CODE");
+        }
+    }
+
+    // --- DEV CHEAT FUNCTIONS ---
+    function cheatMult() {
+        let boost = watts === 0 ? 1000 : watts * 1000;
+        watts += boost; totalEver += boost; updateUI();
+    }
+    
+    function cheatBuyAll() { 
+        for(let i=0; i<catalog.length; i++) owned[i] += 10; 
+        updateUI(); renderShop(); 
+    }
+    
+    function cheatSellAll() { 
+        for(let i=0; i<catalog.length; i++) owned[i] = Math.max(0, owned[i]-10); 
+        updateUI(); renderShop(); 
+    }
+
+    function setShopMode(mode) {
+        shopMode = mode;
+        document.getElementById('mode-buy').classList.toggle('active', mode === 'buy');
+        document.getElementById('mode-sell').classList.toggle('active', mode === 'sell');
+        
+        // Update the 1x/5x/10x button colors to match the mode
+        const amts = [1, 5, 10];
+        amts.forEach(amt => {
+            let btn = document.getElementById('btn-' + amt + 'x');
+            btn.className = `buy-btn ${buyAmount === amt ? 'active' : ''} mode-${mode}`;
+        });
+        
         renderShop();
         updateUI();
     }
 
-    // Uses Geometric Series math to calculate the cost of buying multiple items
+    function setBuyAmount(amt) {
+        buyAmount = amt;
+        const amts = [1, 5, 10];
+        amts.forEach(a => {
+            let btn = document.getElementById('btn-' + a + 'x');
+            if (a === amt) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        renderShop();
+        updateUI();
+    }
+
     function getCost(base, rate, currentOwned, amountToBuy) {
         if (amountToBuy === 1) return Math.floor(base * Math.pow(rate, currentOwned));
         return Math.floor(base * Math.pow(rate, currentOwned) * (Math.pow(rate, amountToBuy) - 1) / (rate - 1));
+    }
+
+    function getSellValue(base, rate, currentOwned, amountToSell) {
+        if (currentOwned < amountToSell) return 0;
+        let originalCost;
+        if (amountToSell === 1) {
+            originalCost = base * Math.pow(rate, currentOwned - 1);
+        } else {
+            let k = currentOwned - amountToSell;
+            originalCost = base * Math.pow(rate, k) * (Math.pow(rate, amountToSell) - 1) / (rate - 1);
+        }
+        return Math.floor(originalCost * 0.5); // 50% refund
     }
 
     function getMultiplier() { return 1 + rebirths; }
@@ -356,23 +442,37 @@
             rebirthBtn.innerText = "SYSTEM REBIRTH [LOCKED]";
         }
         
-        // Update Shop visuals based on new Multi-buy costs
         const uiItems = document.querySelectorAll('.item');
         catalog.forEach((u, i) => {
-            let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
-            if(watts >= cost) uiItems[i].classList.remove('locked');
-            else uiItems[i].classList.add('locked');
+            if (shopMode === 'buy') {
+                let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
+                if(watts >= cost) uiItems[i].classList.remove('locked');
+                else uiItems[i].classList.add('locked');
+            } else {
+                if(owned[i] >= buyAmount) uiItems[i].classList.remove('locked');
+                else uiItems[i].classList.add('locked');
+            }
         });
     }
 
-    function buy(i) {
-        let cost = getCost(catalog[i].cost, catalog[i].rate, owned[i], buyAmount);
-        if(watts >= cost) {
-            watts -= cost;
-            owned[i] += buyAmount; // Give the player X amount of items
-            if(document.getElementById('sfx-toggle').checked) buySfx.play().catch(()=>{});
-            renderShop();
-            updateUI();
+    function shopAction(i) {
+        if (shopMode === 'buy') {
+            let cost = getCost(catalog[i].cost, catalog[i].rate, owned[i], buyAmount);
+            if(watts >= cost) {
+                watts -= cost;
+                owned[i] += buyAmount;
+                if(document.getElementById('sfx-toggle').checked) buySfx.play().catch(()=>{});
+                renderShop();
+                updateUI();
+            }
+        } else if (shopMode === 'sell') {
+            if (owned[i] >= buyAmount) {
+                let refund = getSellValue(catalog[i].cost, catalog[i].rate, owned[i], buyAmount);
+                watts += refund;
+                owned[i] -= buyAmount;
+                renderShop();
+                updateUI();
+            }
         }
     }
 
@@ -380,22 +480,37 @@
         const container = document.getElementById('upgrade-list');
         container.innerHTML = '';
         catalog.forEach((u, i) => {
-            let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
             let el = document.createElement('div');
-            el.className = `item ${watts < cost ? 'locked' : ''}`;
-            el.onclick = () => buy(i);
             
-            // Added a small "Buy X" indicator under the price to make it super clear
-            el.innerHTML = `
-                <div class="item-info">
-                    <h4>${u.name} [Lv.${owned[i]}]</h4>
-                    <p>${u.desc}</p>
-                </div>
-                <div class="item-cost-display">
-                    <div style="color:var(--orange); font-weight:900;">${format(cost)}</div>
-                    <span>BUY ${buyAmount}</span>
-                </div>
-            `;
+            if (shopMode === 'buy') {
+                let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
+                el.className = `item ${watts < cost ? 'locked' : ''}`;
+                el.onclick = () => shopAction(i);
+                el.innerHTML = `
+                    <div class="item-info">
+                        <h4>${u.name} [Lv.${owned[i]}]</h4>
+                        <p>${u.desc}</p>
+                    </div>
+                    <div class="item-cost-display">
+                        <div style="color:var(--orange); font-weight:900;">${format(cost)}</div>
+                        <span>BUY ${buyAmount}</span>
+                    </div>
+                `;
+            } else {
+                let refund = getSellValue(u.cost, u.rate, owned[i], buyAmount);
+                el.className = `item sell-mode ${owned[i] < buyAmount ? 'locked' : ''}`;
+                el.onclick = () => shopAction(i);
+                el.innerHTML = `
+                    <div class="item-info">
+                        <h4 style="color:var(--green);">${u.name} [Lv.${owned[i]}]</h4>
+                        <p>${u.desc}</p>
+                    </div>
+                    <div class="item-cost-display">
+                        <div style="color:var(--green); font-weight:900;">+${format(refund)}</div>
+                        <span>SELL ${buyAmount}</span>
+                    </div>
+                `;
+            }
             container.appendChild(el);
         });
     }
